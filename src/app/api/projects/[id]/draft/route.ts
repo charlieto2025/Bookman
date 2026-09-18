@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { requireProject } from "@/lib/authz";
-import { streamDraft, type DraftMode } from "@/lib/anthropic";
+import { streamDraft, type DraftMode } from "@/lib/openai";
 
 const VALID_MODES: DraftMode[] = ["predict_next", "character_what_if", "draft_chapter"];
 
@@ -27,15 +27,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .map((c) => `## 第${c.index}章：${c.title}\n${c.content}`)
     .join("\n\n");
 
-  const anthropicStream = streamDraft({ mode, canonContext, recentChapters, instructions });
+  const openaiStream = await streamDraft({ mode, canonContext, recentChapters, instructions });
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        for await (const event of anthropicStream) {
-          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-            controller.enqueue(encoder.encode(event.delta.text));
+        for await (const event of openaiStream) {
+          if (event.type === "response.output_text.delta") {
+            controller.enqueue(encoder.encode(event.delta));
           }
         }
         controller.close();
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }
     },
     cancel() {
-      anthropicStream.abort();
+      openaiStream.controller.abort();
     },
   });
 

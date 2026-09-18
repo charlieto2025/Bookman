@@ -1,11 +1,18 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { z } from "zod";
+import OpenAI from "openai";
+import { zodTextFormat } from "openai/helpers/zod";
+import { z } from "zod/v4";
 import type { CanonEntryType } from "@/generated/prisma/client";
 
-export const anthropic = new Anthropic();
+// Constructed lazily (not at module load) because the OpenAI SDK throws
+// immediately if OPENAI_API_KEY is unset - eager construction would crash
+// every page that imports this module, not just the AI-feature ones.
+let client: OpenAI | null = null;
+function getClient(): OpenAI {
+  if (!client) client = new OpenAI();
+  return client;
+}
 
-const MODEL = "claude-opus-5";
+const MODEL = "gpt-5.5";
 
 const CANON_CATEGORIES = ["CHARACTER", "WORLD", "TIMELINE", "OTHER"] as const;
 
@@ -59,21 +66,15 @@ export async function extractCanonProposals(params: {
   sourceLabel: string;
   existingEntries: ExistingEntry[];
 }): Promise<CanonProposal[]> {
-  const response = await anthropic.messages.parse({
+  const response = await getClient().responses.parse({
     model: MODEL,
-    max_tokens: 16000,
-    output_config: { effort: "medium", format: zodOutputFormat(CanonProposalSchema) },
-    system: EXTRACTION_SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `当前设定集：\n\n${formatExistingEntries(params.existingEntries)}\n\n---\n\n新文本（来源：${params.sourceLabel}）：\n\n${params.sourceText}`,
-      },
-    ],
+    instructions: EXTRACTION_SYSTEM_PROMPT,
+    input: `当前设定集：\n\n${formatExistingEntries(params.existingEntries)}\n\n---\n\n新文本（来源：${params.sourceLabel}）：\n\n${params.sourceText}`,
+    text: { format: zodTextFormat(CanonProposalSchema, "canon_proposals") },
   });
 
-  if (!response.parsed_output) return [];
-  return response.parsed_output.proposals;
+  if (!response.output_parsed) return [];
+  return response.output_parsed.proposals;
 }
 
 export type DraftMode = "predict_next" | "character_what_if" | "draft_chapter";
@@ -87,7 +88,7 @@ const DRAFT_SYSTEM_PROMPTS: Record<DraftMode, string> = {
 输出应为可直接使用的正文文字，不需要额外的解释或提纲，除非作者特别要求。`,
 };
 
-export function streamDraft(params: {
+export async function streamDraft(params: {
   mode: DraftMode;
   canonContext: string;
   recentChapters: string;
@@ -99,10 +100,10 @@ export function streamDraft(params: {
     `【作者的要求】\n${params.instructions}`,
   ];
 
-  return anthropic.messages.stream({
+  return getClient().responses.create({
     model: MODEL,
-    max_tokens: 64000,
-    system: DRAFT_SYSTEM_PROMPTS[params.mode],
-    messages: [{ role: "user", content: contextParts.join("\n\n") }],
+    instructions: DRAFT_SYSTEM_PROMPTS[params.mode],
+    input: contextParts.join("\n\n"),
+    stream: true,
   });
 }

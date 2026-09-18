@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/currentUser";
 import { requireProject } from "@/lib/authz";
-import { extractCanonProposals } from "@/lib/anthropic";
+import { extractCanonProposals } from "@/lib/openai";
 import type { CanonEntryType } from "@/generated/prisma/client";
 
 const CANON_TYPES: CanonEntryType[] = ["CHARACTER", "WORLD", "TIMELINE", "OTHER"];

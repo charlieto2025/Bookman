@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireProject } from "@/lib/authz";
 import { extractTextFromDocx } from "@/lib/docx";
-import { extractCanonProposals } from "@/lib/anthropic";
+import { extractCanonProposals } from "@/lib/openai";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = await params;

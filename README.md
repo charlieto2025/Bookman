@@ -31,8 +31,8 @@ framing (字数而非词数), since that's the primary writing language for this
 - Prisma 7 + SQLite (`prisma/schema.prisma`, client generated into
   `src/generated/prisma` — gitignored, regenerated via the `postinstall`
   script)
-- `@anthropic-ai/sdk` (Claude Opus 5) for extraction (structured output) and
-  drafting (streaming)
+- `openai` SDK (model `gpt-5.5`, via the Responses API) for extraction
+  (structured output) and drafting (streaming)
 - `mammoth` for `.docx` → plain text
 
 There's no login system yet — every request acts as a single seeded user
@@ -44,7 +44,7 @@ schema rewrite.
 
 ```bash
 npm install
-cp .env.example .env   # then fill in ANTHROPIC_API_KEY
+cp .env.example .env   # then fill in OPENAI_API_KEY
 npm run db:migrate     # creates prisma/dev.db and applies migrations
 npm run dev
 ```
@@ -56,14 +56,14 @@ Open [http://localhost:3000](http://localhost:3000).
 | Variable | Purpose |
 | --- | --- |
 | `DATABASE_URL` | SQLite file path, e.g. `file:./prisma/dev.db` |
-| `ANTHROPIC_API_KEY` | Claude API key ([console.anthropic.com](https://console.anthropic.com)) |
+| `OPENAI_API_KEY` | OpenAI API key ([platform.openai.com](https://platform.openai.com)) |
 | `DEFAULT_USER_EMAIL` | Optional; identifies the single local user record. Defaults to `writer@bookman.local`. |
 
 ## Project layout
 
 ```
 prisma/schema.prisma          data model (User, Project, CanonEntry, Chapter, Upload, CanonDiff)
-src/lib/anthropic.ts          Claude calls: canon extraction (structured output) + draft streaming
+src/lib/openai.ts             OpenAI calls: canon extraction (structured output) + draft streaming
 src/lib/docx.ts               .docx -> text
 src/app/actions.ts            server actions (create project, canon CRUD, approve/reject diffs, save chapter)
 src/app/api/.../upload        route handler: multipart upload -> parse -> extract -> diffs
