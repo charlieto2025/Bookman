@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  createdAt DateTime  @default(now())
+  projects  Project[]
+}
+
+model Project {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  title     String
+  language  String    @default("zh")
+  createdAt DateTime  @default(now())
+
+  canonEntries CanonEntry[]
+  chapters     Chapter[]
+  uploads      Upload[]
+  canonDiffs   CanonDiff[]
+}
+
+enum CanonEntryType {
+  CHARACTER
+  WORLD
+  TIMELINE
+  OTHER
+}
+
+model CanonEntry {
+  id        String         @id @default(cuid())
+  projectId String
+  project   Project        @relation(fields: [projectId], references: [id])
+  type      CanonEntryType
+  name      String
+  content   String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  diffs CanonDiff[]
+}
+
+model Chapter {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  index     Int
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+
+  canonDiffs CanonDiff[]
+
+  @@unique([projectId, index])
+}
+
+enum UploadStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+model Upload {
+  id        String       @id @default(cuid())
+  projectId String
+  project   Project      @relation(fields: [projectId], references: [id])
+  filename  String
+  rawText   String
+  status    UploadStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+}
+
+enum CanonDiffType {
+  CREATE
+  UPDATE
+}
+
+enum CanonDiffStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CanonDiffSource {
+  UPLOAD
+  CHAPTER
+  MANUAL
+}
+
+model CanonDiff {
+  id        String          @id @default(cuid())
+  projectId String
+  project   Project         @relation(fields: [projectId], references: [id])
+
+  // Set when this diff proposes an update to an existing entry; null means "create new".
+  entryId   String?
+  entry     CanonEntry?     @relation(fields: [entryId], references: [id])
+
+  chapterId String?
+  chapter   Chapter?        @relation(fields: [chapterId], references: [id])
+
+  source    CanonDiffSource
+  type      CanonDiffType
+  category  CanonEntryType
+  proposedName    String
+  proposedContent String
+  rationale       String?
+
+  status    CanonDiffStatus @default(PENDING)
+  createdAt DateTime        @default(now())
+  resolvedAt DateTime?
+}
