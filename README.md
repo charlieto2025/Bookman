@@ -49,6 +49,16 @@ npm run db:migrate     # creates prisma/dev.db and applies migrations
 npm run dev
 ```
 
+### Windows: launching without the terminal
+
+After the one-time setup above, double-click **`start-bookman.bat`** (in the
+project root) any time you want to use the app — it applies any pending
+database updates, starts the server in its own window, and opens
+http://localhost:3000 in your browser automatically. To make it even
+quicker, right-click the file → **Send to** → **Desktop (create shortcut)**
+for a Desktop icon. Closing the "Bookman Server" window it opens stops the
+server.
+
 Open [http://localhost:3000](http://localhost:3000).
 
 ### Environment variables
