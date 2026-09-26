@@ -2,7 +2,7 @@
 cd /d "%~dp0"
 
 echo Applying any pending database updates...
-call npx prisma migrate deploy
+call npm run db:migrate
 
 echo Starting Bookman server...
 start "Bookman Server (close this window to stop)" cmd /k "npm run dev"
