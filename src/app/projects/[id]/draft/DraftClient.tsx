@@ -60,7 +60,7 @@ export function DraftClient({ projectId }: { projectId: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-xl bg-zinc-50 p-5 ring-1 ring-zinc-900/5">
         <div className="flex flex-col gap-2">
           {MODES.map((m) => (
             <label key={m.value} className="flex items-center gap-2 text-sm">
@@ -81,12 +81,12 @@ export function DraftClient({ projectId }: { projectId: string }) {
           placeholder="描述你的具体要求，例如：主角在得知真相后会怎么做？"
           required
           rows={4}
-          className="rounded border border-zinc-300 px-3 py-2 font-serif"
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 font-serif"
         />
         <button
           type="submit"
           disabled={isStreaming}
-          className="self-start rounded bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700 disabled:opacity-50"
+          className="self-start rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700 disabled:opacity-50"
         >
           {isStreaming ? "生成中…" : "生成"}
         </button>
@@ -95,7 +95,7 @@ export function DraftClient({ projectId }: { projectId: string }) {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {(output || isStreaming) && (
-        <div className="rounded-lg border border-zinc-200 bg-white p-5">
+        <div className="rounded-xl bg-zinc-50 p-5 ring-1 ring-zinc-900/5">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">生成结果</h2>
             {output && (

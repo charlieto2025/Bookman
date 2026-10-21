@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/currentUser";
@@ -13,10 +12,7 @@ export default async function DraftPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link href={`/projects/${projectId}`} className="text-sm text-zinc-500 hover:underline">
-          ← 返回作品
-        </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">写作 / 预测</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">写作 / 预测</h1>
         <p className="mt-2 text-sm text-zinc-500">
           生成的内容仅供参考，请自行复制到你的手稿中；本工具不会自动保存到章节记录。
         </p>

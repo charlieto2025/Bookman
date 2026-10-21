@@ -30,20 +30,15 @@ export default async function ProjectDashboard({ params }: { params: Promise<{ i
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link href="/" className="text-sm text-zinc-500 hover:underline">
-          ← 所有作品
-        </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{project.title}</h1>
-      </div>
+      <h1 className="text-2xl font-semibold tracking-tight">{project.title}</h1>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {links.map((l) => (
           <Link
             key={l.href}
             href={l.href}
-            className={`rounded-lg border bg-white p-4 hover:border-zinc-400 ${
-              l.highlight ? "border-amber-400" : "border-zinc-200"
+            className={`rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-900/5 hover:ring-zinc-900/15 ${
+              l.highlight ? "ring-amber-300" : ""
             }`}
           >
             <div className="font-medium">{l.label}</div>

@@ -11,7 +11,7 @@ export default async function Home() {
   });
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="mx-auto flex max-w-xl flex-col gap-10">
       <section>
         <h1 className="text-2xl font-semibold tracking-tight">我的作品</h1>
         {projects.length === 0 ? (
@@ -22,7 +22,7 @@ export default async function Home() {
               <li key={p.id}>
                 <Link
                   href={`/projects/${p.id}`}
-                  className="block rounded-lg border border-zinc-200 bg-white px-4 py-3 hover:border-zinc-400"
+                  className="block rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-zinc-900/5 hover:ring-zinc-900/15"
                 >
                   <span className="font-medium">{p.title}</span>
                   <span className="ml-2 text-sm text-zinc-400">{p.language}</span>
@@ -33,22 +33,22 @@ export default async function Home() {
         )}
       </section>
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-5">
+      <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-900/5">
         <h2 className="text-lg font-semibold">新建作品</h2>
         <form action={createProject} className="mt-3 flex flex-col gap-3">
           <input
             name="title"
             placeholder="作品名称"
             required
-            className="rounded border border-zinc-300 px-3 py-2"
+            className="rounded-lg border border-zinc-300 px-3 py-2"
           />
-          <select name="language" defaultValue="zh" className="rounded border border-zinc-300 px-3 py-2">
+          <select name="language" defaultValue="zh" className="rounded-lg border border-zinc-300 px-3 py-2">
             <option value="zh">中文</option>
             <option value="en">English</option>
           </select>
           <button
             type="submit"
-            className="self-start rounded bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700"
+            className="self-start rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700"
           >
             创建
           </button>

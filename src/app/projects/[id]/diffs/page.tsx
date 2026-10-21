@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/currentUser";
@@ -32,19 +31,14 @@ export default async function DiffsPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <Link href={`/projects/${projectId}`} className="text-sm text-zinc-500 hover:underline">
-          ← 返回作品
-        </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">待审核的设定变更</h1>
-      </div>
+      <h1 className="text-2xl font-semibold tracking-tight">待审核的设定变更</h1>
 
       {diffs.length === 0 ? (
         <p className="text-zinc-500">目前没有待审核的变更。</p>
       ) : (
         <div className="flex flex-col gap-4">
           {diffs.map((diff) => (
-            <div key={diff.id} className="rounded-lg border border-amber-300 bg-amber-50 p-4">
+            <div key={diff.id} className="rounded-xl bg-amber-50 p-4 ring-1 ring-amber-200">
               <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
                 <span className="rounded bg-white px-2 py-0.5">{TYPE_LABELS[diff.category]}</span>
                 <span className="rounded bg-white px-2 py-0.5">
@@ -67,7 +61,7 @@ export default async function DiffsPage({ params }: { params: Promise<{ id: stri
                   <input type="hidden" name="action" value="approve" />
                   <button
                     type="submit"
-                    className="rounded bg-emerald-700 px-3 py-1.5 text-sm text-white hover:bg-emerald-800"
+                    className="rounded-lg bg-emerald-700 px-3 py-1.5 text-sm text-white hover:bg-emerald-800"
                   >
                     采纳
                   </button>
@@ -78,7 +72,7 @@ export default async function DiffsPage({ params }: { params: Promise<{ id: stri
                   <input type="hidden" name="action" value="reject" />
                   <button
                     type="submit"
-                    className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm hover:bg-zinc-100"
+                    className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm hover:bg-zinc-100"
                   >
                     忽略
                   </button>

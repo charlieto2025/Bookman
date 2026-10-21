@@ -119,6 +119,25 @@ export async function resolveDiff(formData: FormData) {
   revalidatePath(`/projects/${projectId}/canon`);
 }
 
+export async function updateChapter(formData: FormData) {
+  const projectId = String(formData.get("projectId") ?? "");
+  await requireProject(projectId);
+
+  const chapterId = String(formData.get("chapterId") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const content = String(formData.get("content") ?? "").trim();
+  if (!title || !content) throw new Error("Title and content are required");
+
+  await db.chapter.updateMany({
+    where: { id: chapterId, projectId },
+    data: { title, content },
+  });
+
+  revalidatePath(`/projects/${projectId}/chapters`);
+  revalidatePath(`/projects/${projectId}/chapters/${chapterId}`);
+  redirect(`/projects/${projectId}/chapters/${chapterId}`);
+}
+
 export async function saveChapter(formData: FormData) {
   const projectId = String(formData.get("projectId") ?? "");
   await requireProject(projectId);

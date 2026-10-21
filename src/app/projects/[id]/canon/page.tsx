@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/currentUser";
@@ -30,12 +29,7 @@ export default async function CanonPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <Link href={`/projects/${projectId}`} className="text-sm text-zinc-500 hover:underline">
-          ← 返回作品
-        </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">故事设定集</h1>
-      </div>
+      <h1 className="text-2xl font-semibold tracking-tight">故事设定集</h1>
 
       {grouped.map(
         (group) =>
@@ -44,7 +38,7 @@ export default async function CanonPage({ params }: { params: Promise<{ id: stri
               <h2 className="text-lg font-semibold text-zinc-700">{TYPE_LABELS[group.type]}</h2>
               <div className="mt-3 flex flex-col gap-3">
                 {group.entries.map((entry) => (
-                  <details key={entry.id} className="rounded-lg border border-zinc-200 bg-white p-4">
+                  <details key={entry.id} className="rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-900/5">
                     <summary className="cursor-pointer font-medium">{entry.name}</summary>
                     <form action={updateCanonEntry} className="mt-3 flex flex-col gap-2">
                       <input type="hidden" name="projectId" value={projectId} />
@@ -53,19 +47,19 @@ export default async function CanonPage({ params }: { params: Promise<{ id: stri
                         name="name"
                         defaultValue={entry.name}
                         required
-                        className="rounded border border-zinc-300 px-3 py-2"
+                        className="rounded-lg border border-zinc-300 bg-white px-3 py-2"
                       />
                       <textarea
                         name="content"
                         defaultValue={entry.content}
                         required
                         rows={5}
-                        className="rounded border border-zinc-300 px-3 py-2 font-serif"
+                        className="rounded-lg border border-zinc-300 bg-white px-3 py-2 font-serif"
                       />
                       <div className="flex gap-2">
                         <button
                           type="submit"
-                          className="rounded bg-zinc-900 px-3 py-1.5 text-sm text-white hover:bg-zinc-700"
+                          className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm text-white hover:bg-zinc-700"
                         >
                           保存修改
                         </button>
@@ -85,28 +79,28 @@ export default async function CanonPage({ params }: { params: Promise<{ id: stri
           ),
       )}
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-5">
+      <section className="rounded-xl bg-zinc-50 p-5 ring-1 ring-zinc-900/5">
         <h2 className="text-lg font-semibold">手动添加设定条目</h2>
         <form action={createCanonEntryManual} className="mt-3 flex flex-col gap-3">
           <input type="hidden" name="projectId" value={projectId} />
-          <select name="type" defaultValue="CHARACTER" className="rounded border border-zinc-300 px-3 py-2">
+          <select name="type" defaultValue="CHARACTER" className="rounded-lg border border-zinc-300 bg-white px-3 py-2">
             {(Object.keys(TYPE_LABELS) as CanonEntryType[]).map((t) => (
               <option key={t} value={t}>
                 {TYPE_LABELS[t]}
               </option>
             ))}
           </select>
-          <input name="name" placeholder="名称" required className="rounded border border-zinc-300 px-3 py-2" />
+          <input name="name" placeholder="名称" required className="rounded-lg border border-zinc-300 bg-white px-3 py-2" />
           <textarea
             name="content"
             placeholder="详细内容"
             required
             rows={4}
-            className="rounded border border-zinc-300 px-3 py-2 font-serif"
+            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 font-serif"
           />
           <button
             type="submit"
-            className="self-start rounded bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700"
+            className="self-start rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700"
           >
             添加
           </button>
