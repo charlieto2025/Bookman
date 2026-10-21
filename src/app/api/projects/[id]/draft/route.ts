@@ -2,12 +2,14 @@ import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { requireProject } from "@/lib/authz";
 import { streamDraft, type DraftMode } from "@/lib/openai";
+import { chapterOrdinal, type Locale } from "@/lib/i18n";
 
 const VALID_MODES: DraftMode[] = ["predict_next", "character_what_if", "draft_chapter"];
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = await params;
-  await requireProject(projectId);
+  const project = await requireProject(projectId);
+  const language: Locale = project.language === "en" ? "en" : "zh";
 
   const body = await request.json();
   const mode: DraftMode = VALID_MODES.includes(body.mode) ? body.mode : "predict_next";
@@ -24,10 +26,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const canonContext = entries.map((e) => `[${e.type}] ${e.name}\n${e.content}`).join("\n\n");
   const recentChapters = recent
     .reverse()
-    .map((c) => `## 第${c.index}章：${c.title}\n${c.content}`)
+    .map((c) => `## ${chapterOrdinal(c.index, language)}: ${c.title}\n${c.content}`)
     .join("\n\n");
 
-  const openaiStream = await streamDraft({ mode, canonContext, recentChapters, instructions });
+  const openaiStream = await streamDraft({ mode, canonContext, recentChapters, instructions, language });
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({

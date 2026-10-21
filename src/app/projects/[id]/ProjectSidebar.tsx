@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { t, chapterOrdinal, chapterCountLabel, projectLanguageLabels, type Locale, type Dictionary } from "@/lib/i18n";
 
 type Chapter = { id: string; index: number; title: string };
 
 export function ProjectSidebar(props: {
+  locale: Locale;
+  dict: Dictionary;
   projectId: string;
   projectTitle: string;
   projectLanguage: string;
@@ -13,16 +16,21 @@ export function ProjectSidebar(props: {
   canonCount: number;
   pendingDiffCount: number;
 }) {
-  const { projectId, projectTitle, projectLanguage, chapters, canonCount, pendingDiffCount } = props;
+  const { locale, dict, projectId, projectTitle, projectLanguage, chapters, canonCount, pendingDiffCount } = props;
   const pathname = usePathname();
+  const langLabels = projectLanguageLabels[locale];
 
   const navItems = [
-    { href: `/projects/${projectId}/draft`, label: "写作 / 预测" },
-    { href: `/projects/${projectId}/canon`, label: "故事设定", badge: canonCount > 0 ? String(canonCount) : undefined },
-    { href: `/projects/${projectId}/upload`, label: "上传设定文档" },
+    { href: `/projects/${projectId}/draft`, label: dict.dashboard.write },
+    {
+      href: `/projects/${projectId}/canon`,
+      label: dict.dashboard.canon,
+      badge: canonCount > 0 ? String(canonCount) : undefined,
+    },
+    { href: `/projects/${projectId}/upload`, label: dict.dashboard.upload },
     {
       href: `/projects/${projectId}/diffs`,
-      label: "待审核的设定变更",
+      label: dict.dashboard.diffs,
       badge: pendingDiffCount > 0 ? String(pendingDiffCount) : undefined,
       highlight: pendingDiffCount > 0,
     },
@@ -31,7 +39,7 @@ export function ProjectSidebar(props: {
   return (
     <aside className="flex w-64 shrink-0 flex-col gap-4 text-sm">
       <Link href="/" className="px-1 text-xs font-medium text-zinc-400 hover:text-zinc-600">
-        ← 所有作品
+        {dict.nav.allProjects}
       </Link>
 
       <Link
@@ -40,7 +48,8 @@ export function ProjectSidebar(props: {
       >
         <div className="truncate font-semibold text-zinc-900">{projectTitle}</div>
         <div className="mt-1 text-xs text-zinc-400">
-          {projectLanguage === "zh" ? "中文" : "English"} · 共 {chapters.length} 章
+          {projectLanguage === "en" ? langLabels.en : langLabels.zh} ·{" "}
+          {chapterCountLabel(chapters.length, locale)}
         </div>
       </Link>
 
@@ -76,18 +85,20 @@ export function ProjectSidebar(props: {
 
       <div className="rounded-2xl bg-white p-2 shadow-sm ring-1 ring-zinc-900/5">
         <div className="flex items-center justify-between px-2 py-1.5">
-          <span className="text-xs font-semibold tracking-wide text-zinc-400">章节 {chapters.length}</span>
+          <span className="text-xs font-semibold tracking-wide text-zinc-400">
+            {t(dict.sidebar.chaptersHeader, { n: chapters.length })}
+          </span>
           <Link
             href={`/projects/${projectId}/chapters`}
             className={`text-xs ${
               pathname === `/projects/${projectId}/chapters` ? "font-medium text-zinc-900" : "text-zinc-400 hover:text-zinc-600"
             }`}
           >
-            全部
+            {dict.sidebar.all}
           </Link>
         </div>
         {chapters.length === 0 ? (
-          <div className="px-2 py-2 text-xs text-zinc-400">还没有章节</div>
+          <div className="px-2 py-2 text-xs text-zinc-400">{dict.sidebar.noChapters}</div>
         ) : (
           <div className="flex max-h-80 flex-col overflow-y-auto">
             {chapters.map((c) => {
@@ -97,6 +108,7 @@ export function ProjectSidebar(props: {
                 <Link
                   key={c.id}
                   href={href}
+                  title={chapterOrdinal(c.index, locale)}
                   className={`flex items-center gap-2 rounded-xl px-2 py-2 ${
                     active ? "bg-rose-50 text-rose-700" : "text-zinc-700 hover:bg-zinc-50"
                   }`}

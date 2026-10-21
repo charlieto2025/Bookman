@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/currentUser";
 import { updateChapter } from "@/app/actions";
+import { chapterOrdinal, t } from "@/lib/i18n";
+import { getDictionary } from "@/lib/i18n-server";
 
 export default async function ChapterDetailPage({
   params,
@@ -20,10 +22,13 @@ export default async function ChapterDetailPage({
   const chapter = await db.chapter.findFirst({ where: { id: chapterId, projectId } });
   if (!chapter) notFound();
 
+  const { locale, dict } = await getDictionary();
+  const ordinal = chapterOrdinal(chapter.index, locale);
+
   if (edit) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="text-sm text-zinc-400">编辑第 {chapter.index} 章</div>
+        <div className="text-sm text-zinc-400">{t(dict.chapterDetail.editing, { chapter: ordinal })}</div>
         <form action={updateChapter} className="flex flex-col gap-3">
           <input type="hidden" name="projectId" value={projectId} />
           <input type="hidden" name="chapterId" value={chapter.id} />
@@ -42,13 +47,13 @@ export default async function ChapterDetailPage({
           />
           <div className="flex gap-2">
             <button type="submit" className="rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700">
-              保存
+              {dict.chapterDetail.save}
             </button>
             <Link
               href={`/projects/${projectId}/chapters/${chapter.id}`}
               className="rounded-lg border border-zinc-300 px-4 py-2 hover:bg-zinc-50"
             >
-              取消
+              {dict.chapterDetail.cancel}
             </Link>
           </div>
         </form>
@@ -59,9 +64,9 @@ export default async function ChapterDetailPage({
   return (
     <article className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <div className="text-sm text-zinc-400">第 {chapter.index} 章</div>
+        <div className="text-sm text-zinc-400">{ordinal}</div>
         <Link href={`?edit=1`} className="text-sm text-zinc-500 hover:underline">
-          编辑
+          {dict.chapterDetail.edit}
         </Link>
       </div>
       <h1 className="text-2xl font-semibold tracking-tight">{chapter.title}</h1>

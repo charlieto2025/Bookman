@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import type { Dictionary } from "@/lib/i18n";
 
-const MODES = [
-  { value: "predict_next", label: "预测接下来会发生什么" },
-  { value: "character_what_if", label: "推演某个人物在特定情境下的行为" },
-  { value: "draft_chapter", label: "代笔撰写下一章" },
-] as const;
+type Mode = "predict_next" | "character_what_if" | "draft_chapter";
 
-type Mode = (typeof MODES)[number]["value"];
+export function DraftClient({ projectId, dict }: { projectId: string; dict: Dictionary["draft"] }) {
+  const MODES: { value: Mode; label: string }[] = [
+    { value: "predict_next", label: dict.modePredictNext },
+    { value: "character_what_if", label: dict.modeCharacterWhatIf },
+    { value: "draft_chapter", label: dict.modeDraftChapter },
+  ];
 
-export function DraftClient({ projectId }: { projectId: string }) {
   const [mode, setMode] = useState<Mode>("predict_next");
   const [instructions, setInstructions] = useState("");
   const [output, setOutput] = useState("");
@@ -46,7 +47,7 @@ export function DraftClient({ projectId }: { projectId: string }) {
         setOutput((prev) => prev + decoder.decode(value, { stream: true }));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "生成失败，请重试");
+      setError(err instanceof Error ? err.message : dict.genericError);
     } finally {
       setIsStreaming(false);
     }
@@ -78,7 +79,7 @@ export function DraftClient({ projectId }: { projectId: string }) {
         <textarea
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}
-          placeholder="描述你的具体要求，例如：主角在得知真相后会怎么做？"
+          placeholder={dict.placeholder}
           required
           rows={4}
           className="rounded-lg border border-zinc-300 bg-white px-3 py-2 font-serif"
@@ -88,7 +89,7 @@ export function DraftClient({ projectId }: { projectId: string }) {
           disabled={isStreaming}
           className="self-start rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700 disabled:opacity-50"
         >
-          {isStreaming ? "生成中…" : "生成"}
+          {isStreaming ? dict.generating : dict.generate}
         </button>
       </form>
 
@@ -97,10 +98,10 @@ export function DraftClient({ projectId }: { projectId: string }) {
       {(output || isStreaming) && (
         <div className="rounded-xl bg-zinc-50 p-5 ring-1 ring-zinc-900/5">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">生成结果</h2>
+            <h2 className="text-lg font-semibold">{dict.result}</h2>
             {output && (
               <button onClick={handleCopy} className="text-sm text-zinc-500 hover:underline">
-                {copied ? "已复制" : "复制文本"}
+                {copied ? dict.copied : dict.copy}
               </button>
             )}
           </div>

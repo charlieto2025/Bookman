@@ -3,10 +3,12 @@ import { db } from "@/lib/db";
 import { requireProject } from "@/lib/authz";
 import { extractTextFromDocx } from "@/lib/docx";
 import { extractCanonProposals } from "@/lib/openai";
+import type { Locale } from "@/lib/i18n";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = await params;
-  await requireProject(projectId);
+  const project = await requireProject(projectId);
+  const language: Locale = project.language === "en" ? "en" : "zh";
 
   const formData = await request.formData();
   const file = formData.get("file");
@@ -26,6 +28,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     sourceText: text,
     sourceLabel: file.name,
     existingEntries,
+    language,
   });
 
   if (proposals.length > 0) {

@@ -3,12 +3,16 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/currentUser";
 import { saveChapter } from "@/app/actions";
+import { chapterOrdinal, t } from "@/lib/i18n";
+import { getDictionary } from "@/lib/i18n-server";
 
 export default async function ChaptersPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = await params;
   const user = await getCurrentUser();
   const project = await db.project.findFirst({ where: { id: projectId, userId: user.id } });
   if (!project) notFound();
+
+  const { locale, dict } = await getDictionary();
 
   const chapters = await db.chapter.findMany({
     where: { projectId },
@@ -18,11 +22,8 @@ export default async function ChaptersPage({ params }: { params: Promise<{ id: s
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">章节记录</h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          在这里保存你最终确定的章节正文（写作/预测页只是草稿，请把你实际采用并修改好的版本粘贴到此处）。
-          保存后系统会自动比对设定集，提出可能需要更新的人物 / 世界观 / 时间线信息供你审核。
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{dict.chapters.title}</h1>
+        <p className="mt-2 text-sm text-zinc-500">{dict.chapters.desc}</p>
       </div>
 
       {chapters.length > 0 && (
@@ -33,7 +34,7 @@ export default async function ChaptersPage({ params }: { params: Promise<{ id: s
                 href={`/projects/${projectId}/chapters/${c.id}`}
                 className="block rounded-xl bg-zinc-50 p-4 ring-1 ring-zinc-900/5 hover:ring-zinc-900/15"
               >
-                <div className="text-sm text-zinc-400">第 {c.index} 章</div>
+                <div className="text-sm text-zinc-400">{chapterOrdinal(c.index, locale)}</div>
                 <div className="font-medium">{c.title}</div>
               </Link>
             </li>
@@ -42,18 +43,20 @@ export default async function ChaptersPage({ params }: { params: Promise<{ id: s
       )}
 
       <section className="rounded-xl bg-zinc-50 p-5 ring-1 ring-zinc-900/5">
-        <h2 className="text-lg font-semibold">保存新章节（第 {chapters.length + 1} 章）</h2>
+        <h2 className="text-lg font-semibold">
+          {t(dict.chapters.saveNewTitle, { chapter: chapterOrdinal(chapters.length + 1, locale) })}
+        </h2>
         <form action={saveChapter} className="mt-3 flex flex-col gap-3">
           <input type="hidden" name="projectId" value={projectId} />
           <input
             name="title"
-            placeholder="章节标题"
+            placeholder={dict.chapters.titlePlaceholder}
             required
             className="rounded-lg border border-zinc-300 bg-white px-3 py-2"
           />
           <textarea
             name="content"
-            placeholder="章节正文"
+            placeholder={dict.chapters.contentPlaceholder}
             required
             rows={14}
             className="rounded-lg border border-zinc-300 bg-white px-3 py-2 font-serif"
@@ -62,7 +65,7 @@ export default async function ChaptersPage({ params }: { params: Promise<{ id: s
             type="submit"
             className="self-start rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700"
           >
-            保存章节
+            {dict.chapters.save}
           </button>
         </form>
       </section>

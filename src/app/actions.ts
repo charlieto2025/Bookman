@@ -2,11 +2,19 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/currentUser";
 import { requireProject } from "@/lib/authz";
 import { extractCanonProposals } from "@/lib/openai";
+import { chapterOrdinal, type Locale } from "@/lib/i18n";
 import type { CanonEntryType } from "@/generated/prisma/client";
+
+export async function setLocale(formData: FormData) {
+  const locale = String(formData.get("locale") ?? "zh") === "en" ? "en" : "zh";
+  const store = await cookies();
+  store.set("locale", locale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+}
 
 const CANON_TYPES: CanonEntryType[] = ["CHARACTER", "WORLD", "TIMELINE", "OTHER"];
 
@@ -140,7 +148,8 @@ export async function updateChapter(formData: FormData) {
 
 export async function saveChapter(formData: FormData) {
   const projectId = String(formData.get("projectId") ?? "");
-  await requireProject(projectId);
+  const project = await requireProject(projectId);
+  const language: Locale = project.language === "en" ? "en" : "zh";
 
   const title = String(formData.get("title") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
@@ -159,8 +168,9 @@ export async function saveChapter(formData: FormData) {
   const existingEntries = await db.canonEntry.findMany({ where: { projectId } });
   const proposals = await extractCanonProposals({
     sourceText: content,
-    sourceLabel: `第${nextIndex}章：${title}`,
+    sourceLabel: `${chapterOrdinal(nextIndex, language)}: ${title}`,
     existingEntries,
+    language,
   });
 
   if (proposals.length > 0) {

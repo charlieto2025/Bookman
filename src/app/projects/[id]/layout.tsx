@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/currentUser";
+import { getDictionary } from "@/lib/i18n-server";
 import { ProjectSidebar } from "./ProjectSidebar";
 
 export default async function ProjectLayout({
@@ -15,6 +16,8 @@ export default async function ProjectLayout({
   const project = await db.project.findFirst({ where: { id: projectId, userId: user.id } });
   if (!project) notFound();
 
+  const { locale, dict } = await getDictionary();
+
   const [chapters, canonCount, pendingDiffCount] = await Promise.all([
     db.chapter.findMany({ where: { projectId }, orderBy: { index: "asc" } }),
     db.canonEntry.count({ where: { projectId } }),
@@ -24,6 +27,8 @@ export default async function ProjectLayout({
   return (
     <div className="flex items-start gap-6">
       <ProjectSidebar
+        locale={locale}
+        dict={dict}
         projectId={projectId}
         projectTitle={project.title}
         projectLanguage={project.language}
